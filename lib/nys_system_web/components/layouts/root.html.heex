@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>National Youth Service System</title>
+
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+      .sidebar { transition: all 0.3s ease; }
+      .sidebar.collapsed { width: 80px; }
+      .sidebar.collapsed .sidebar-text,
+      .sidebar.collapsed .logo-text { display: none; }
+
+      .main-content { transition: all 0.3s ease; }
+
+      .notification-dot {
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        width: 12px;
+        height: 12px;
+        background-color: #ef4444;
+        border-radius: 50%;
+      }
+
+      .profile-pic {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: #4b5563;
+      }
+
+      .commander-banner {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+    </style>
+  </head>
+
+  <body class="bg-gray-100">
+    <%= @inner_content %>
+    
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Sidebar toggle
+        const sidebarToggle = document.getElementById("sidebarToggle");
+        if (sidebarToggle) {
+          sidebarToggle.addEventListener("click", () => {
+            document.querySelector(".sidebar").classList.toggle("collapsed");
+          });
+        }
+
+        // Notifications dropdown
+        const notificationButton = document.getElementById("notificationButton");
+        if (notificationButton) {
+          notificationButton.addEventListener("click", () => {
+            document.getElementById("notificationDropdown").classList.toggle("hidden");
+          });
+        }
+
+        // User menu dropdown
+        const userMenuButton = document.getElementById("userMenuButton");
+        if (userMenuButton) {
+          userMenuButton.addEventListener("click", () => {
+            document.getElementById("userDropdown").classList.toggle("hidden");
+          });
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener("click", (e) => {
+          const nBtn = document.getElementById("notificationButton");
+          const nDrop = document.getElementById("notificationDropdown");
+          const uBtn = document.getElementById("userMenuButton");
+          const uDrop = document.getElementById("userDropdown");
+
+          if (nBtn && nDrop && !nBtn.contains(e.target) && !nDrop.contains(e.target)) {
+            nDrop.classList.add("hidden");
+          }
+
+          if (uBtn && uDrop && !uBtn.contains(e.target) && !uDrop.contains(e.target)) {
+            uDrop.classList.add("hidden");
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
