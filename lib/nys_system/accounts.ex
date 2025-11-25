@@ -160,10 +160,6 @@ defmodule NysSystem.Accounts do
     |> Repo.all()
   end
 
-  @doc """
-  Lists users by unit.
-  O(n) where n = users in unit (optimized with index)
-  """
 def list_users_by_barrack(barrack_id) do
   User
   |> where([u], u.barrack_id == ^barrack_id)

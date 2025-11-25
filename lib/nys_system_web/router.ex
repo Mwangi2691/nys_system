@@ -44,12 +44,12 @@ defmodule NysSystemWeb.Router do
     pipe_through :browser
 
     # Public pages
-    get "/", PageController, :index
+    get "/index", PageController, :index
     get "/logout", AuthController, :logout
     get "/signup", PageController, :signup
     post "/signup", PageController, :create_account
     get "/verify", PageController, :verify
-    get "/login", PageController, :login
+    get "/", PageController, :login
   end
 
   # Protected routes (require authentication + automatic role routing)

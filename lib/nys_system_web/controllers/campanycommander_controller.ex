@@ -3,14 +3,72 @@ defmodule NysSystemWeb.CommanderController do
   alias NysSystem.Accounts
   alias NysSystem.Passes
   alias NysSystem.Repo
+  alias NysSystem.Inventory
+  alias NysSystem.Duties
   require Logger
 
   plug :require_commander_role
 
+  # def index(conn, _params) do
+  #   user = NysSystemWeb.Auth.current_user(conn) |> Repo.preload([:unit, :barrack])
+
+  #   # Ensure commander has a barrack assigned
+  #   if is_nil(user.barrack_id) do
+  #     conn
+  #     |> put_flash(:error, "No barrack assigned to your account. Please contact administration.")
+  #     |> redirect(to: "/dashboard")
+  #     |> halt()
+  #   else
+  #     # Get all personnel from commander's barrack
+  #     barrack_personnel =
+  #       Accounts.list_users_by_barrack(user.barrack_id)
+  #       |> Repo.preload([:unit])
+
+  #     # Get pending pass requests for the barrack
+  #     pending_pass_requests =
+  #       Passes.list_pending_passes_by_barrack(user.barrack_id)
+  #       |> Repo.preload([:user])
+
+  #     # Get active/approved passes for the barrack
+  #     active_passes =
+  #       Passes.list_active_passes_by_barrack(user.barrack_id)
+  #       |> Repo.preload([:user])
+
+  #     # Calculate statistics
+  #     total_personnel = length(barrack_personnel)
+  #     on_pass = length(active_passes)
+  #     pending_passes_count = length(pending_pass_requests)
+
+  #     # Count servicemen and servicewomen
+  #     servicemen = Enum.count(barrack_personnel, fn p -> p.gender == "male" end)
+  #     servicewomen = Enum.count(barrack_personnel, fn p -> p.gender == "female" end)
+
+  #     # On duty = total - on pass
+  #     on_duty = total_personnel - on_pass
+
+  #     barrack_stats = %{
+  #       total_personnel: total_personnel,
+  #       on_duty: on_duty,
+  #       on_pass: on_pass,
+  #       pending_passes: pending_passes_count,
+  #       servicemen: servicemen,
+  #       servicewomen: servicewomen
+  #     }
+
+  #     render(conn, :index,
+  #       user: user,
+  #       barrack: user.barrack,
+  #       barrack_personnel: barrack_personnel,
+  #       barrack_stats: barrack_stats,
+  #       pending_pass_requests: pending_pass_requests,
+  #       pending_pass_count: pending_passes_count,
+  #       active_passes: active_passes
+  #     )
+  #   end
+  # end
   def index(conn, _params) do
     user = NysSystemWeb.Auth.current_user(conn) |> Repo.preload([:unit, :barrack])
 
-    # Ensure commander has a barrack assigned
     if is_nil(user.barrack_id) do
       conn
       |> put_flash(:error, "No barrack assigned to your account. Please contact administration.")
@@ -32,16 +90,23 @@ defmodule NysSystemWeb.CommanderController do
         Passes.list_active_passes_by_barrack(user.barrack_id)
         |> Repo.preload([:user])
 
+      # NEW: Get inventory for the barrack
+      barrack_inventory = Inventory.list_by_barrack(user.barrack_id)
+      inventory_stats = Inventory.get_barrack_inventory_stats(user.barrack_id)
+
+      # NEW: Get duty assignments
+      active_duties = Duties.list_active_by_barrack(user.barrack_id)
+      upcoming_duties = Duties.list_upcoming_by_barrack(user.barrack_id, 7)
+      active_duty_count = Duties.count_active_duties(user.barrack_id)
+
       # Calculate statistics
       total_personnel = length(barrack_personnel)
       on_pass = length(active_passes)
       pending_passes_count = length(pending_pass_requests)
 
-      # Count servicemen and servicewomen
       servicemen = Enum.count(barrack_personnel, fn p -> p.gender == "male" end)
       servicewomen = Enum.count(barrack_personnel, fn p -> p.gender == "female" end)
 
-      # On duty = total - on pass
       on_duty = total_personnel - on_pass
 
       barrack_stats = %{
@@ -50,7 +115,9 @@ defmodule NysSystemWeb.CommanderController do
         on_pass: on_pass,
         pending_passes: pending_passes_count,
         servicemen: servicemen,
-        servicewomen: servicewomen
+        servicewomen: servicewomen,
+        # NEW
+        active_duty_count: active_duty_count
       }
 
       render(conn, :index,
@@ -60,7 +127,12 @@ defmodule NysSystemWeb.CommanderController do
         barrack_stats: barrack_stats,
         pending_pass_requests: pending_pass_requests,
         pending_pass_count: pending_passes_count,
-        active_passes: active_passes
+        active_passes: active_passes,
+        # NEW ASSIGNS
+        barrack_inventory: barrack_inventory,
+        inventory_stats: inventory_stats,
+        active_duties: active_duties,
+        upcoming_duties: upcoming_duties
       )
     end
   end
